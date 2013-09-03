@@ -1,0 +1,32 @@
+__________
+Author: Florian "Skapin" BOUDINET
+Contact: florian.boudinet@gmail.com
+Last Update: September 2013
+________________
+
+
+this is an Arduino sketch for i2c use. 
+The purpose is to extend an Arduino board with another arduino.
+The main Arduino board handle software, extended board handle pin.
+
+ ------                         -----            -----
+|master| <-------i2c com.----> |Slave|<---i2c-->|slave|<----i2c-   -  ->
+|      |                       |     |          |     |
+ ------                        -------           -----
+
+
+
+1. Software
+
+There are two makefile, one for master and one for the slave.
+If you want to use those makefile, you have to install ino and the arduino env.
+
+apt-get install arduino
+apt-get install ino
+
+
+make: compile
+make up: upload the hex file to your board (you have to specify the board number inside the makefile
+make serial : open a terminal between the board and your computer
+
+ctrl+a ctrlq: close the  terminal (picocom command)
