@@ -1,78 +1,63 @@
 
-
+#include <inttypes.h>
 #include <Wire.h>
-#include "../../common/src/i2c.h"
 
-#define LED_OUT 13
-#define SLAVE_ID 4	// who am I?
+#include "Configuration.h"
+#include "i2c_slave.h"
+
 #define bool boolean
 
-
-int x;
-int Source;
+uint8_t board_id=2;
 int next_send_pin;
-
-char String1[20];
 bool send_entries_flag = false;
+bool send_pong_flag = false;
 
-
-void init_pin_table()
-{
-    for( int i =0; i<PIN_MAX_NUMBER ; ++i ) // Loop to send all entries
-    {
-        pinMode_ext( i, PIN_TYPE_INPUT );
-        set_pin_value( i, i*2 );
-    }
-}
 
 void setup_salve_master() {
-    Wire.begin(SLAVE_ID);                // join i2c bus
+    Wire.begin( board_id );                // join i2c bus
     Wire.onReceive(i2cReceiveEvent); // register event  
     next_send_pin = 0;
 }
 void setup() {
     setup_salve_master();
     Serial.begin(19200);           
-    pinMode(LED_OUT, OUTPUT);
-    Source = 0;
     init_pin_table();
 }
 
 void i2c_send_entries()
 {
-    int i,j;
-    Serial.print("[loop] start send entries ->");
-    Serial.flush();
+    int j;
     Wire.beginTransmission( MASTER_ID ); // Open th I2C link
-    Wire.write( SLAVE_ID );
+    Wire.write( board_id );
     Wire.write( I2C_SET );
-    for( j =0; j< ((BUFFER_LENGTH-2)/3) ; ++j ) // Loop to send all entries. TWI buffer is only 32 Byte. We send 3 byte during each for loop
+    for( j =0; j< ((BUFFER_LENGTH-2)/3) ; ++j ) // Loop to send all entries. TWI buffer is only 32 Byte. We send 3 byte during each "for" loop
     {
-        if ( pin_values[i].type == PIN_TYPE_INPUT ) 
+        if ( READ_PIN_MODE(next_send_pin) == PIN_TYPE_INPUT ) 
         {
             Wire.write( next_send_pin );
-            Wire.write( pin_values[next_send_pin].value & 0xFF00 );
-            Wire.write( pin_values[next_send_pin].value & 0x00FF );
+            Wire.write( board.pin_values[next_send_pin].value & 0xFF00 );
+            Wire.write( board.pin_values[next_send_pin].value & 0x00FF );
         }
-        next_send_pin = (next_send_pin+1) % PIN_MAX_NUMBER;      
+        next_send_pin = (next_send_pin+1) % PINS_PER_BOARD;      
     }
     Wire.endTransmission();
     send_entries_flag = false;
 }
 
 void loop() {
-    for( int i =0; i<PIN_MAX_NUMBER ; ++i ) // Loop to send all entries
-    {
-        Serial.print(pin_values[i].value);
-        Serial.print(".");
-        Serial.flush();
-    }
+    Serial.print("Loop.");
     // Master want us to send entries values.
     if ( send_entries_flag )
     {
-        i2c_send_entries();
+        //i2c_send_entries();
     }
-    delay(10);
+    if ( send_pong_flag )
+    {
+        send_pong_flag = false;
+        i2c_send_action( board_id, MASTER_ID, I2C_PONG );
+    }
+    delay( DELAY_MAIN_LOOP );
+    
 }
 
 // function that executes whenever data is received from master
@@ -81,7 +66,6 @@ void i2cReceiveEvent(int howMany) {
     byte pin = 0;
     int value = 0;
     byte action = Wire.read();
-    
     if ( action == I2C_GET ) 
     {
         Serial.print(" GET ");
@@ -94,7 +78,7 @@ void i2cReceiveEvent(int howMany) {
             pin = Wire.read();
             value = Wire.read() << 8;
             value += Wire.read();
-            set_pin_Ext( pin, value );
+            WRITE_PIN( pin, value );
         }
     }
     else if ( action == I2C_ALL ) 
@@ -107,13 +91,18 @@ void i2cReceiveEvent(int howMany) {
             {
                 value = Wire.read() << 8;
                 value += Wire.read();
-                set_pin_Ext( pin, value );            
+                WRITE_PIN( pin, value );            
             }
             else if ( action == I2C_SETUP)
             {
                 value = Wire.read();
-                pinMode_ext( pin, value );    
+                PIN_MODE( pin, value );    
             }
         }
+    }
+    else if ( action == I2C_PING ) 
+    {
+        Serial.print(" PING ");
+        send_pong_flag = true;
     }
 }
