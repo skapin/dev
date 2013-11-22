@@ -38,3 +38,12 @@ void init_pin_table()
     }
 }
 
+
+void i2c_send_version( uint8_t sender, int dest )
+{
+    Wire.beginTransmission( dest );
+    Wire.I2C_WRITE( sender );
+    Wire.I2C_WRITE( I2C_VERSION );
+    Wire.I2C_WRITE( VERSION );
+    Wire.endTransmission();
+}

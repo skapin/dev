@@ -5,8 +5,13 @@
 #include "Pin.h"
 
 
-#define BOARD_CHECK_OK    0
-#define BOARD_CHECK_WAIT_PONG   1
+#define BOARD_WAIT_VERSION    0
+#define BOARD_WAIT_INIT    1
+#define BOARD_WAIT_PONG   2
+#define BOARD_OK    3
+#define BOARD_BAD_VERSION   4
+#define BOARD_OFF    5
+
 #define BOARD_CHECK_DELAY   10*5 //total time is : 100ms * board_check_timer = 5sec
 
 class Board

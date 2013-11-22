@@ -1,3 +1,11 @@
+#include <Arduino.h>
+void setup_slave_master(  );
+void setup();
+void i2c_send_entries();
+void check_board();
+void loop();
+void i2cReceiveEvent(int howMany);
+#line 1 "src/slave.ino"
 
 #include <inttypes.h>
 #include <Wire.h>
@@ -157,6 +165,7 @@ void i2cReceiveEvent(int howMany) {
         Serial.print(" VERSION");
         if ( Wire.available() )
         {
+            Serial.print(" VERSION ");
             value = Wire.read();
             if ( value > VERSION )
             {

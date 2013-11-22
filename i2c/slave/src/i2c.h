@@ -32,6 +32,7 @@
 #define I2C_PONG            6
 #define I2C_RESET           7
 #define I2C_VERSION         8
+#define I2C_INIT            9
 
 #define MASTER_ID           1
 

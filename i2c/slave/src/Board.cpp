@@ -6,7 +6,7 @@ Board::Board()
 {
     this->pin_values={};
     this->connected = false;
-    this->check_state = BOARD_CHECK_OK;
+    this->check_state = BOARD_OK;
 }
 
 void check_boards_connected()

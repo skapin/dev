@@ -5,6 +5,8 @@
 #include <SPI.h>
 
 #include <Wire.h>
+
+#include "Configuration.h"
 #include "i2c.h"
 #include "Board.h"
 
@@ -24,6 +26,7 @@ int i2c_read_pin_value( int pin );
 uint8_t i2c_read_pin_type( int pin );
 
 void init_pin_table();
+void i2c_send_version( uint8_t sender, int dest );
 
 #define WRITE_PIN(i, t) i2c_update_pin_value(  i, t)
 #define READ_PIN(i) i2c_read_pin_value( i )
