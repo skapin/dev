@@ -21,11 +21,19 @@ Board board;
 
 void i2c_update_pin_value( int pin, int value) {
     i2c_set_vpin_value( board.pin_values, pin, value );
+    if ( IS_DIGITAL(board.pin_values[pin].type) ) // digital
+    {
+        digitalWrite( pin, value );
+    }
+    else
+    {
+        analogWrite( pin, value );
+    }
     //pin_update_queue.push( Update{pin, I2C_SET} );
 
 }
 void i2c_update_pin_type(  int pin, uint8_t type) {
-    pinMode(pin, type );
+    pinMode(pin, type & PIN_TYPE_IO_MASK );
     i2c_set_vpin_type( board.pin_values, pin, type );
 }
 
