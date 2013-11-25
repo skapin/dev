@@ -12,7 +12,7 @@
 #include "QueueList.h"
 #include "Update.h"
 
-#include "i2c.h"
+#include "eps.h"
 
 
 #define BOARD_WAIT_VERSION    0

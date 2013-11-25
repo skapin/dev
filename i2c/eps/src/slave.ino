@@ -11,7 +11,7 @@
 #include <Wire.h>
 
 #include "Configuration.h"
-#include "i2c.h"
+#include "eps.h"
 
 #define WRITE_PIN(p,v) boards[0].write_bpin(p,v)
 #define PIN_MODE(p,t) boards[0].write_bpin_type(p,t)
@@ -21,7 +21,7 @@
 
 bool send_entries_flag = false;
 uint8_t timer_check_pin = 0;
-volatile byte timer_i2c_update = 0 ;// 10ms*10 = 100ms; use base counter
+volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
 
 void(* resetFunc) (void) = 0; 
 
@@ -56,7 +56,7 @@ void loop() {
         // Master want us to send entries values.
         if ( send_entries_flag )
         {
-            send_entries_flag = i2c_send_entries(0);
+            send_entries_flag = eps_send_entries(0);
         }
         ++timer_check_pin;
         if ( timer_check_pin >= DELAY_CHECK_PIN )
@@ -64,7 +64,7 @@ void loop() {
             board.check_pins_update();
             timer_check_pin = 0;
         }
-        i2c_send_board_update( 0 );
+        eps_send_board_update( 0 );
         __asm__("nop\n\t"); 
         //delay( DELAY_MAIN_LOOP );
     }
@@ -75,12 +75,12 @@ void i2cReceiveEvent(int howMany) {
     byte pin = 0;
     int value = 0;
     byte action = Wire.read();
-    if ( action == I2C_GET && board.connected ) 
+    if ( action == EPS_GET && board.connected ) 
     {
         Serial.print(" GET ");
         send_entries_flag = true;
     }
-    else if ( action == I2C_SET ) 
+    else if ( action == EPS_SET ) 
     {
         Serial.print(" SET ");
         if ( Wire.available() )
@@ -91,7 +91,7 @@ void i2cReceiveEvent(int howMany) {
             WRITE_PIN( pin, value );            
         }
     }
-    else if ( action == I2C_SETUP ) 
+    else if ( action == EPS_SETUP ) 
     {
         Serial.print(" SETUP ");
         while ( Wire.available() )
@@ -102,42 +102,42 @@ void i2cReceiveEvent(int howMany) {
             Serial.print(pin);
         }
     }
-    else if ( action == I2C_ALL ) 
+    else if ( action == EPS_ALL ) 
     {
         Serial.print(" all ");
         while ( Wire.available() )
         {
             action = Wire.read();
             pin = Wire.read();
-            if ( action == I2C_SET)
+            if ( action == EPS_SET)
             {
                 value = Wire.read() << 8;
                 value += Wire.read();
                 WRITE_PIN( pin, value );            
             }
-            else if ( action == I2C_SETUP)
+            else if ( action == EPS_SETUP)
             {
                 value = Wire.read();
                 PIN_MODE( pin, value );    
             }
         }
     }
-    else if ( action == I2C_PING && board.connected ) 
+    else if ( action == EPS_PING && board.connected ) 
     {
         Serial.print(" PING ");
         board.check_state = BOARD_WAIT_PONG;
     }
-    else if ( action == I2C_RESET ) 
+    else if ( action == EPS_RESET ) 
     {
         Serial.print(" RESET ");
         resetFunc();
     }
-    else if ( action == I2C_INIT ) 
+    else if ( action == EPS_INIT ) 
     {
         Serial.print(" INIT ");
         board.check_state = BOARD_WAIT_INIT;
     }
-    else if ( action == I2C_VERSION ) 
+    else if ( action == EPS_VERSION ) 
     {
         Serial.print(" VERSION");
         board.connected = false;

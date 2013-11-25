@@ -27,10 +27,10 @@ void Board::check_connected()
         switch ( check_state )
         {   
             case BOARD_WAIT_VERSION :
-                i2c_send_version( i+1 );
+                eps_send_version( i+1 );
             break;         
             case BOARD_WAIT_INIT :
-                i2c_send_action( i+1, I2C_INIT );
+                eps_send_action( i+1, EPS_INIT );
             break;
             
             case BOARD_WAIT_PONG :
@@ -39,7 +39,7 @@ void Board::check_connected()
             break;            
             case BOARD_OK :
                 check_state = BOARD_WAIT_PONG;
-                i2c_send_action( i+1, I2C_PING );
+                eps_send_action( i+1, EPS_PING );
             break;
             default:
             break;
@@ -61,7 +61,7 @@ void Board::check_pins_update()
                 value = digitalRead( i );
                 if ( read_bpin( i ) != value )
                 {
-                    pin_update_queue.push( Update{ i, I2C_SET } );
+                    pin_update_queue.push( Update{ i, EPS_SET } );
                     write_bpin( i, value );
                 }
             }
@@ -102,27 +102,27 @@ void Board::process_state( uint8_t dest )
         case BOARD_WAIT_PONG :
         {
             check_state = BOARD_OK;
-            i2c_send_action( dest, I2C_PONG );
+            eps_send_action( dest, EPS_PONG );
         }
         break;
         case BOARD_WAIT_VERSION :
         {
             check_state = BOARD_W8_MASTER;
-            i2c_send_version( dest );
+            eps_send_version( dest );
         }
         break;
         case BOARD_WAIT_INIT :
         {
             check_state = BOARD_OK;
             connected = true;
-            i2c_send_action( dest, I2C_INIT );
+            eps_send_action( dest, EPS_INIT );
         }
         break;
         case BOARD_BAD_VERSION :
         {
             check_state = BOARD_OFF;
             connected = false;
-            i2c_send_version( dest );
+            eps_send_version( dest );
         }
         break;
         
