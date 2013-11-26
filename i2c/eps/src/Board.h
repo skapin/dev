@@ -24,7 +24,9 @@
 #define BOARD_INIT    6
 #define BOARD_W8_MASTER    7
 
-#define BOARD_CHECK_DELAY   10*5 //total time is : 100ms * board_check_timer = 5sec
+#define BOARD_CONNECTED_CHECK_DELAY     10 //total time is : 100ms * BOARD_CONNECTED_CHECK_DELAY = 1sec
+#define BOARD_UPDATE_CHECK_DELAY        1 //total time is : 100ms * BOARD_UPDATE_CHECK_DELAY = 100mssec
+#define BOARD_SEND_GET_DELAY            10*60 // 1min
 
 class Board
 {
@@ -33,7 +35,7 @@ class Board
     Board();
     ~Board();
     
-    void check_connected();
+    void check_connected( uint8_t dest );
     void check_pins_update();
     void process_state( uint8_t dest );
     

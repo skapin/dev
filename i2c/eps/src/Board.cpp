@@ -1,6 +1,5 @@
 #include "Board.h"
 
-uint8_t last_check = 0;
 
 Board::Board()
 {
@@ -13,37 +12,30 @@ Board::~Board()
     
 }
 
-void Board::check_connected()
-{   // need to wait more ?
-    if ( last_check < BOARD_CHECK_DELAY )
-    {
-        last_check++;
-        return;
-    }
-    // code to execute
-    last_check = 0; // reset cmpt
-    for ( uint8_t i = 1; i < NUM_BOARD ; ++i )
-    {
-        switch ( check_state )
-        {   
-            case BOARD_WAIT_VERSION :
-                eps_send_version( i+1 );
-            break;         
-            case BOARD_WAIT_INIT :
-                eps_send_action( i+1, EPS_INIT );
-            break;
-            
-            case BOARD_WAIT_PONG :
-                connected = false ;
+void Board::check_connected( uint8_t dest )
+{  
+    switch ( check_state )
+    {   
+        case BOARD_WAIT_VERSION :
+            eps_send_version( dest );
+        break;         
+        case BOARD_WAIT_INIT :
+            eps_send_action( dest, EPS_INIT );
+        break;
+        case BOARD_WAIT_PONG :
+            connected = false ;
+            check_state = BOARD_WAIT_VERSION;
+        break;            
+        case BOARD_OK :
+            check_state = BOARD_WAIT_PONG;
+            eps_send_action( dest, EPS_PING );
+        break;
+        case BOARD_W8_MASTER:
+            #ifdef IS_MASTER
                 check_state = BOARD_WAIT_VERSION;
-            break;            
-            case BOARD_OK :
-                check_state = BOARD_WAIT_PONG;
-                eps_send_action( i+1, EPS_PING );
-            break;
-            default:
-            break;
-        }
+            #endif
+        default:
+        break;
     }
 }
 

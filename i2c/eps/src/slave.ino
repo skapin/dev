@@ -13,22 +13,11 @@
 #include "Configuration.h"
 #include "eps.h"
 
-#define WRITE_PIN(p,v) boards[0].write_bpin(p,v)
-#define PIN_MODE(p,t) boards[0].write_bpin_type(p,t)
-
 #define bool boolean
-#define board boards[0]
 
-bool send_entries_flag = false;
 uint8_t timer_check_pin = 0;
 volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
 
-void(* resetFunc) (void) = 0; 
-
-void setup_slave_master(  ) {
-    Wire.begin( BOARD_ID );                // join i2c bus
-    Wire.onReceive(i2cReceiveEvent); // register event  
-}
 void setup() 
 {
     Serial.begin(19200);   
@@ -40,7 +29,6 @@ void setup()
 
 void loop() {
     board.process_state( MASTER_ID );
-    //Serial.print(".");
     if ( board.check_state == BOARD_OFF )
     {
         Serial.print(" OFF ");
@@ -67,99 +55,6 @@ void loop() {
         eps_send_board_update( 0 );
         __asm__("nop\n\t"); 
         //delay( DELAY_MAIN_LOOP );
-    }
-}
-// function that executes whenever data is received from master
-// this function is registered as an event, see setup()
-void i2cReceiveEvent(int howMany) {
-    byte pin = 0;
-    int value = 0;
-    byte action = Wire.read();
-    if ( action == EPS_GET && board.connected ) 
-    {
-        Serial.print(" GET ");
-        send_entries_flag = true;
-    }
-    else if ( action == EPS_SET ) 
-    {
-        Serial.print(" SET ");
-        if ( Wire.available() )
-        {
-            pin = Wire.read();
-            value = Wire.read()<<8;
-            value += Wire.read();
-            WRITE_PIN( pin, value );            
-        }
-    }
-    else if ( action == EPS_SETUP ) 
-    {
-        Serial.print(" SETUP ");
-        while ( Wire.available() )
-        {
-            pin = Wire.read();
-            value = Wire.read();
-            PIN_MODE( pin, value );  
-            Serial.print(pin);
-        }
-    }
-    else if ( action == EPS_ALL ) 
-    {
-        Serial.print(" all ");
-        while ( Wire.available() )
-        {
-            action = Wire.read();
-            pin = Wire.read();
-            if ( action == EPS_SET)
-            {
-                value = Wire.read() << 8;
-                value += Wire.read();
-                WRITE_PIN( pin, value );            
-            }
-            else if ( action == EPS_SETUP)
-            {
-                value = Wire.read();
-                PIN_MODE( pin, value );    
-            }
-        }
-    }
-    else if ( action == EPS_PING && board.connected ) 
-    {
-        Serial.print(" PING ");
-        board.check_state = BOARD_WAIT_PONG;
-    }
-    else if ( action == EPS_RESET ) 
-    {
-        Serial.print(" RESET ");
-        resetFunc();
-    }
-    else if ( action == EPS_INIT ) 
-    {
-        Serial.print(" INIT ");
-        board.check_state = BOARD_WAIT_INIT;
-    }
-    else if ( action == EPS_VERSION ) 
-    {
-        Serial.print(" VERSION");
-        board.connected = false;
-        if ( Wire.available() )
-        {
-            value = Wire.read();
-            if ( value > VERSION )
-            {
-                Serial.print(" BAD VERSION ");
-                board.check_state = BOARD_BAD_VERSION;
-            }
-            else
-            {
-                Serial.print(" GOOD VERSION ");
-                board.check_state = BOARD_WAIT_VERSION;
-            }
-        }
-    }
-    else
-    {
-        Serial.print(" else? ");
-        Serial.print( action );        
     }
 }
 

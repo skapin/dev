@@ -4,7 +4,14 @@
  * 
  * **/
  
-#define VERSION             1
+#define IS_SLAVE            1          
+//#define IS_MASTER            1
+
+#ifdef IS_SLAVE
+ #define board boards[0]
+ #define WRITE_PIN(p,v) boards[0].write_bpin(p,v)
+ #define PIN_MODE(p,t) boards[0].write_bpin_type(p,t)
+#endif
 
 #define BOARD_ID            2
 #define NUM_BOARD           1
