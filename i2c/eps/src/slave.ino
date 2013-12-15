@@ -10,7 +10,7 @@
 #include <inttypes.h>
 #include <Wire.h>
 
-#include "Configuration.h"
+#include "Configuration_eps.h"
 #include "eps.h"
 
 #define bool boolean
