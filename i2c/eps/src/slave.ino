@@ -15,7 +15,8 @@
 
 #define bool boolean
 
-uint8_t timer_check_pin = 0;
+uint8_t timer_check_pin_slow = 0;
+uint8_t timer_check_pin_fast = 0;
 volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
 
 void setup() 
@@ -46,15 +47,27 @@ void loop() {
         {
             send_entries_flag = eps_send_entries(0);
         }
-        ++timer_check_pin;
-        if ( timer_check_pin >= DELAY_CHECK_PIN )
+        ++timer_check_pin_fast;
+        
+        //Check FAST pin ?
+        if ( timer_check_pin_slow >= DELAY_CHECK_PIN_FAST )
         {
-            board.check_pins_update();
-            timer_check_pin = 0;
+            board.check_pins_update( PIN_TYPE_FAST_CHECK);
+            timer_check_pin_fast = 0;
         }
+        //Check SLOW (classic) pin ?
+        ++timer_check_pin_slow;
+        if ( timer_check_pin_slow >= DELAY_CHECK_PIN_SLOW )
+        {
+            board.check_pins_update( );
+            timer_check_pin_slow = 0;
+        }
+        
+        //Send queued pin value to master via i2c
         eps_send_board_update( 0 );
-        __asm__("nop\n\t"); 
-        //delay( DELAY_MAIN_LOOP );
+        //__asm__("nop\n\t"); 
+        // wait a bit
+        delayMicroseconds( DELAY_MAIN_LOOP );
     }
 }
 

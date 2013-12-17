@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include "Pin.h"
+#include "CounterPin.h"
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
@@ -36,7 +37,7 @@ class Board
     ~Board();
     
     void check_connected( uint8_t dest );
-    void check_pins_update();
+    void check_pins_update(uint8_t type = 0);
     void process_state( uint8_t dest );
     
     //READ
@@ -46,7 +47,8 @@ class Board
     int write_bpin( uint8_t pin, int value );
     uint8_t write_bpin_type( uint8_t pin, uint8_t type );
     
-    Pin pin_values[PINS_PER_BOARD];
+    Pin* pin_values[PINS_PER_BOARD];
+        
     uint8_t connected;
     uint8_t check_state;
     QueueList<Update> pin_update_queue;
