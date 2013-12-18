@@ -1,4 +1,4 @@
-/**
+/***********************************************************
  * @file slave.ino
  * @author Florian Boudinet <florian.boudinet@gmail.com>
  * 
@@ -6,22 +6,51 @@
  * This sketch setup an I2C slave board to speak with a master.
  * It's a part of Polybox-Firmware.
  * 
- * **/
+ * *********************************************************/
 #include <inttypes.h>
 #include <Wire.h>
 
 #include "Configuration_eps.h"
-#include "eps.h"
+#include "eps.h" // Extension Pin System
 
-#define bool boolean
+/***********************************************************************
+ * 
+ * Configuration && Define
+ * 
+ * ********************************************************************/
+ 
+ #define bool boolean
 
+#define DELAY_MAIN_LOOP    		10//µs, used at the end of each Loop(). Base Timer
+
+#define DELAY_START_UP			1000 	//ms  time to wait at the end of setup(), to be sure the main board is ready !
+#define DELAY_OFF				1000*30 // = 30sec
+#define DELAY_INIT				100
+#define DELAY_CHECK_PIN_SLOW	1000 // *timer ( DELAY_MAIN_LOOP )
+#define DELAY_CHECK_PIN_FAST	10 // *timer ( DELAY_MAIN_LOOP )
+
+#define SERIAL_BAUDRATE			19200
+
+/***********************************************************************
+ * 
+ * Variables
+ * 
+ * ********************************************************************/
+ 
 uint8_t timer_check_pin_slow = 0;
 uint8_t timer_check_pin_fast = 0;
 volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
 
+
+
+/***********************************************************************
+ * 
+ * Fonctions
+ * 
+ * ********************************************************************/
 void setup() 
 {
-    Serial.begin(19200);   
+    Serial.begin( SERIAL_BAUDRATE );   
     setup_slave_master( ); 
     
     delay( DELAY_START_UP );

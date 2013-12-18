@@ -1,15 +1,21 @@
 #ifndef __PIN_H__
 #define __PIN_H__
 
-/**
+/***********************************************************************
  * ATMEGA 2560
  * 
  * Size of struct :
  * uint8_t : 8bits
  * int : 16bits
- * => 24bits => 3 Bytes
+ * class Pin is => 8+16 => 24bits => 3 Bytes
  * 
- * **/
+ * A Pin can be OUT or INPUT
+ *  INPUT pin are monitored and sent to master periodicaly when values
+ * changed. Futhermore, user can specify FAST or STANDARD (default) 
+ * monitoring. COUNTER pin is inherited from PIN, and provide a counter.
+ * Check doc/code for futher information.
+ * 
+ * ********************************************************************/
  
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -41,7 +47,6 @@
 #define IS_COUNTER(n) ( n & PIN_TYPE_COUNTER ) ==  PIN_TYPE_COUNTER
 #define GET_IO_TYPE type & PIN_TYPE_IO_MASK
 
-
 class Pin
 {
 	public :
@@ -55,6 +60,5 @@ class Pin
 		};
 //	virtual ~Pin(){};
 		
-	
 };
 #endif

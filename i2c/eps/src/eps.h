@@ -1,6 +1,29 @@
 #ifndef __eps_H__
 #define __eps_H__
 
+/***********************************************************************
+ * EPS : Extension Pin System
+ * 
+ * Provide more pin for a arduino master. You can use as much Arduino 
+ * slave you like.
+ * 
+ * Slave doesnt know his pin-mapping, and all the configuration is 
+ * provided by the Master. A time_out system detect when a slave/master
+ *  is deconnected.
+ * 
+ *  A Pin can be OUT or INPUT.
+ * 
+ *  INPUT pin are monitored and sent to master periodicaly when values
+ * changed. Futhermore, user can specify FAST or STANDARD (default) 
+ * monitoring. COUNTER pin is inherited from PIN, and provide a counter.
+ * Check doc/code for futher information.
+ * 
+ * Handshake :
+ * 
+ * Wait > Check Version > Init > Running
+ * 
+ * ********************************************************************/
+ 
 #define EPS_PROTOCOL_VERSION 1
 #define EPS_MIN_VERSION_REQUIRE   1
 
@@ -15,11 +38,6 @@
 #endif
 
 #include <inttypes.h>
-
-/** We use an union to send float through I2C/TWI. Union allow us to share memory cell between Float and byte array.
- * So we use union as reinterpret_cast. Kinda classic but usefull.
- * Wire() class can send byte array and string but no float...
- * **/
 
 
 #define EPS_SETUP           1
