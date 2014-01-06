@@ -19,15 +19,21 @@
  * 
  * ********************************************************************/
  
- #define bool boolean
+#define bool boolean
 
 #define DELAY_MAIN_LOOP    		10//µs, used at the end of each Loop(). Base Timer
 
 #define DELAY_START_UP			1000 	//ms  time to wait at the end of setup(), to be sure the main board is ready !
 #define DELAY_OFF				1000*30 // = 30sec
 #define DELAY_INIT				100
+/** delay for slow pin(default). Check if values changed and push then 
+ * to the updateQueue **/
 #define DELAY_CHECK_PIN_SLOW	1000 // *timer ( DELAY_MAIN_LOOP )
+/** delay for fast pin. Check if values changed and push then 
+ * to the updateQueue **/
 #define DELAY_CHECK_PIN_FAST	10 // *timer ( DELAY_MAIN_LOOP )
+/** psuh delay for analog input (use ADC) **/
+#define DELAY_PROCESS_ANALOG	10000 // *timer ( DELAY_MAIN_LOOP )
 
 #define SERIAL_BAUDRATE			19200
 
@@ -39,6 +45,7 @@
  
 uint8_t timer_check_pin_slow = 0;
 uint8_t timer_check_pin_fast = 0;
+uint8_t timer_process_analog = 0;
 volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
 
 
@@ -91,6 +98,12 @@ void loop() {
             board.check_pins_update( );
             timer_check_pin_slow = 0;
         }
+        // push analog update.
+        if ( timer_process_analog >= DELAY_PROCESS_ANALOG )
+        {
+			board.process_analog();
+			timer_process_analog  = 0;
+		}
         
         //Send queued pin value to master via i2c
         eps_send_board_update( 0 );

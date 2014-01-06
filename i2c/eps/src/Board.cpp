@@ -42,7 +42,19 @@ void Board::check_connected( uint8_t dest )
         break;
     }
 }
-
+void Board::process_analog()
+{
+    int value=0;
+    // we process only analog compatible output pin (i.e pwm out). Check Configuration_eps.h for value/range
+    for ( uint8_t i = PIN_ANALOG; i < PINS_PER_BOARD ; ++i )
+    {
+        // we process only INPUT type pin. Output are controled by master.
+        if ( pin_values[i]->GET_IO_TYPE == PIN_TYPE_INPUT && IS_ANALOG( pin_values[i]->type ) )
+        {
+			pin_update_queue.push( Update{ i, EPS_SET } );
+		}
+	}
+}
 
 void Board::check_pins_update(uint8_t type)
 {
@@ -114,7 +126,7 @@ int Board::write_bpin(  uint8_t pin, int value )
 }
 uint8_t Board::write_bpin_type( uint8_t pin, uint8_t type )
 {
-    pin_values[pin]->type;
+    pin_values[pin]->type = type;
 }
 
 void Board::process_state( uint8_t dest ) 

@@ -3,9 +3,11 @@
  * Variable you can adjust, like delay timer.
  * 
  * **/
- 
-#define IS_SLAVE            1          
-//#define IS_MASTER            1
+#ifndef __CONFIGURATION_EPS_H__
+#define __CONFIGURATION_EPS_H__
+
+#define IS_SLAVE			1          
+//#define IS_MASTER			1
 
 #ifdef IS_SLAVE
  #define board boards[0]
@@ -17,8 +19,8 @@
         #error "You must define a board number. You can do it though make command."
 #endif
 
-#define NUM_BOARD           1
-#define PINS_PER_BOARD      56
+#define NUM_BOARD			1
+#define PINS_PER_BOARD		56
+#define PIN_ANALOG			54
 
-
-
+#endif

@@ -38,6 +38,7 @@ class Board
     
     void check_connected( uint8_t dest );
     void check_pins_update(uint8_t type = 0);
+    void process_analog();
     void process_state( uint8_t dest );
     
     //READ
