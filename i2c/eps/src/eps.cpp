@@ -3,6 +3,7 @@
 Board boards[NUM_BOARD];
 bool send_entries_flag = false;
 int next_send_pin=0;
+volatile uint16_t restart_counter =0 ;
 
 void(* reset_board) (void) = 0; 
 
@@ -18,7 +19,21 @@ uint8_t vpin2bpin(int vpin)
 {
     return vpin/PINS_PER_BOARD;
 }
-
+void printAllPin()
+{
+	for ( uint8_t i =0 ; i<NUM_BOARD ; ++i )
+	{
+		Serial.print("Board");
+		Serial.println(i);
+		for ( uint8_t h = 0 ; h<PINS_PER_BOARD ; ++h )
+		{
+			Serial.print(h);
+			Serial.print(":");
+			Serial.print( boards[i].pin_values[h]->value);
+			Serial.print("  ");
+		}
+	}
+}
 // READ
 int eps_read_vpin_value( int pin )
 {
@@ -197,6 +212,7 @@ void i2cReceiveEvent(int howMany)
             }
         }
     }
+    
     #else
     byte pin = 0;
     int value = 0;
@@ -204,81 +220,74 @@ void i2cReceiveEvent(int howMany)
     byte action = Wire.read();
     if ( action == EPS_GET && board.connected ) 
     {
-        Serial.print(" GET ");
         send_entries_flag = true;
     }
     else if ( action == EPS_SET ) 
     {
-        Serial.print(" SET ");
         if ( Wire.available() )
         {
             pin = Wire.I2C_READ();
             value = Wire.I2C_READ()<<8;
             value += Wire.I2C_READ();
-            WRITE_PIN( pin, value );            
+            WRITE_VPIN( pin, value );            
         }
     }
     else if ( action == EPS_SETUP ) 
     {
-        Serial.print(" SETUP ");
         while ( Wire.available() )
         {
             pin = Wire.I2C_READ();
             value = Wire.I2C_READ();
-            PIN_MODE( pin, value );  
+            VPIN_MODE( pin, value );  
             Serial.print(pin);
         }
     }
     else if ( action == EPS_ALL ) 
     {
-        Serial.print(" all ");
         while ( Wire.available() )
         {
             action = Wire.I2C_READ();
-            pin = Wire.read();
+            pin = Wire.I2C_READ();
             if ( action == EPS_SET)
             {
                 value = Wire.I2C_READ() << 8;
                 value += Wire.I2C_READ();
-                WRITE_PIN( pin, value );            
+                WRITE_VPIN( pin, value );
+                
             }
             else if ( action == EPS_SETUP)
             {
                 value = Wire.I2C_READ();
-                PIN_MODE( pin, value );    
+                VPIN_MODE( pin, value );    
             }
         }
+        
     }
     else if ( action == EPS_PING && board.connected ) 
     {
-        Serial.print(" PING ");
         board.check_state = BOARD_WAIT_PONG;
     }
     else if ( action == EPS_RESET ) 
     {
-        Serial.print(" RESET ");
         reset_board();
     }
     else if ( action == EPS_INIT ) 
     {
-        Serial.print(" INIT ");
         board.check_state = BOARD_WAIT_INIT;
     }
     else if ( action == EPS_VERSION ) 
     {
-        Serial.print(" VERSION");
+		restart_counter++;
         board.connected = false;
         if ( Wire.available() )
         {
             value = Wire.read();
             if ( value > EPS_PROTOCOL_VERSION )
             {
-                Serial.print(" BAD VERSION ");
                 board.check_state = BOARD_BAD_VERSION;
             }
             else
             {
-                Serial.print(" GOOD VERSION ");
                 board.check_state = BOARD_WAIT_VERSION;
             }
         }

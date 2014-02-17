@@ -137,6 +137,7 @@ void Board::process_state( uint8_t dest )
         {
             check_state = BOARD_OK;
             eps_send_action( dest, EPS_PONG );
+            Serial.print(" ->PONG ");
         }
         break;
         case BOARD_WAIT_VERSION :

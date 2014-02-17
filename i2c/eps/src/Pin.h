@@ -24,8 +24,6 @@
 #include "WProgram.h"
 #endif
  
-#define PINS_PER_BOARD      56
-
 #define PIN_TYPE_INPUT      INPUT //1
 #define PIN_TYPE_OUTPUT     OUTPUT //0
 #define PIN_TYPE_DIGITAL    0

@@ -36,7 +36,7 @@
 #define DELAY_PROCESS_ANALOG	10000 // *timer ( DELAY_MAIN_LOOP )
 
 /** we sum X time each analog value, to smooth result (average result) **/
-#define SERIAL_BAUDRATE			19200
+#define SERIAL_BAUDRATE			115200
 
 #define ANALOG_SUM				5
 
@@ -45,14 +45,13 @@
  * Variables
  * 
  * ********************************************************************/
- 
+uint8_t need_check = true ;
 uint8_t timer_check_pin_slow = 0;
 uint8_t timer_check_pin_fast = 0;
 uint8_t timer_process_analog = 0;
 uint8_t current_analog = 0; // current analog pin
 uint8_t current_analog_sum_number = 0; // we sum X time each analog value, to smooth result (average result)
 volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
-
 
 
 /***********************************************************************
@@ -64,16 +63,17 @@ void setup_analog_timer()
 {
     TCCR0A = 0;  // Setup analog interrupt
     OCR0B = 64;
-    TIMSK0 |= (1<<OCIE0B);    
+    TIMSK0 |= (1<<OCIE0B);
 }
 
 void setup() 
 {
     Serial.begin( SERIAL_BAUDRATE );   
     setup_slave_master( ); 
-    setup_analog_timer();
+    pinMode(3,OUTPUT);
+  //  setup_analog_timer();
     
-    
+    // Read and init ADCC for 1st time (dummy value)
     delay( DELAY_START_UP );
 }
 
@@ -87,11 +87,12 @@ void loop() {
     }
     else if ( board.check_state == BOARD_W8_MASTER )
     {
+		Serial.print(" W8 ");
+		digitalWrite(3, HIGH);
         delay( DELAY_INIT );
     }
     else
     {
-     //   Serial.print(".");
         // Master want us to send entries values.
         if ( send_entries_flag )
         {
@@ -133,32 +134,32 @@ This timer is called 3906 timer per second. It is used to read Analog Input (usi
 */
 ISR( TIMER0_COMPB_vect )
 {
-	if ( check_is_ok )
+/*	if ( need_check )
 	{
 		current_analog++;//next value to conv.
 		if ( current_analog > 15 ) // number of ANALOG pin
 		{
 			current_analog = 0;
 		}
-		if ( IS_ANALOG(board.pin_values[current_analog].type) )
+		if ( IS_ANALOG(board.pin_values[current_analog]->type) )
 		{
 			#if defined(ADCSRB) && defined(MUX5)
-			if(channel & 8)  // Reading channel 0-7 or 8-15?
+			if(current_analog & 8)  // Reading channel 0-7 or 8-15?
 				ADCSRB |= _BV(MUX5);
 			else
 				ADCSRB &= ~_BV(MUX5);
 			#endif
 			ADMUX = (ADMUX & ~(0x1F)) | (current_analog & 7);
 			ADCSRA |= _BV(ADSC);  // start next conversion
-			check_is_ok = false;
+			need_check = false;
 		}	
 	}
 	else
 	{
 		if( (ADCSRA & _BV(ADSC)) == 0 )  // Conversion finished ?
 		{
-			board.pin_values[current_analog].value = ADCW;
-			check_is_ok = true;
+			board.pin_values[current_analog]->value = ADCW;
+			need_check = true;
 		}
-	}
+	}*/
 }
