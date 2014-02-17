@@ -1,7 +1,8 @@
 
-TARGET = /dev/ttyACM0
+TARGET = /dev/ttyACM1
 BOARD_TYPE = mega2560
 COMPILER = ino
+BOARD_ID=-1
 
 build:
 	${COMPILER} build -m ${BOARD_TYPE} -f=-DBOARD_ID=${BOARD_ID}
@@ -13,4 +14,4 @@ up:
 	${COMPILER} upload -m ${BOARD_TYPE} -p ${TARGET}
 
 serial:
-	${COMPILER} serial -b 19200 -p ${TARGET}
+	${COMPILER} serial -b 115200 -p ${TARGET}
