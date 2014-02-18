@@ -1,6 +1,17 @@
 This software use Ino tool to convert Arduino sketch into classic .hex object, ready to be used for a specifique board.
 
 
+Requierements
+==================
+You need Ino Tool. Get and install with Python tool :
+
+pip install ino
+
+Link to InoTool: http://inotool.org/
+
+Setup
+==================
+
 You first need to create an empty folder where init ino files. 
 mkdir build
 cd build
