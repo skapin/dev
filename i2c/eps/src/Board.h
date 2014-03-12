@@ -36,10 +36,10 @@ class Board
     Board();
     ~Board();
     
-    void check_connected( uint8_t dest );
+    void manage_status( );
     void check_pins_update(uint8_t type = 0);
     void process_analog();
-    void process_state( uint8_t dest );
+    void manage_ping_pong();
     
     //READ
     int read_bpin( uint8_t pin );
@@ -49,9 +49,12 @@ class Board
     uint8_t write_bpin_type( uint8_t pin, uint8_t type );
     
     Pin* pin_values[PINS_PER_BOARD];
-        
+    
+    static uint8_t next_id;
     uint8_t connected;
     uint8_t check_state;
+    uint8_t i2c_id;
+    
     QueueList<Update> pin_update_queue;
     
     void init_pin_table();

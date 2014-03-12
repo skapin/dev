@@ -28,7 +28,8 @@
 #define EPS_MIN_VERSION_REQUIRE   1
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#define I2C_WRITE write
+#define I2C_WRITE write 
+//;eps_ack_add_data(n)
 #define I2C_READ read
 #include "Arduino.h"
 #else
@@ -49,6 +50,8 @@
 #define EPS_RESET           7
 #define EPS_VERSION         8
 #define EPS_INIT            9
+#define EPS_TOKEN			10
+#define EPS_ACK				31
 
 #define MASTER_ID           1
 
@@ -65,6 +68,10 @@ class Board;
 
 extern Board boards[NUM_BOARD];
 extern bool send_entries_flag;
+extern volatile bool has_token;
+extern uint32_t i2c_ack_resend_count;
+extern uint32_t i2c_timer;
+extern bool send_ack;
 
 uint8_t vpin2bpin(int vpin);
 uint8_t vpin2board(int vpin);
@@ -86,6 +93,8 @@ void eps_send_version( int dest );
 void eps_send_board_update(uint8_t dest);
 byte eps_send_entries(uint8_t dest);
 
+void eps_manage();
+
 void i2cReceiveEvent(int howMany);
 void setup_slave_master();
 void printAllPin();
@@ -96,5 +105,11 @@ void printAllPin();
  void * operator new(size_t size); 
 #endif
 
+///< ACK
+void eps_ack_add_data( uint8_t data);
+void eps_ack_reset();
+uint8_t eps_ack_is_waiting();
+void eps_ack_resend();
+void eps_check_ack();
 
 #endif

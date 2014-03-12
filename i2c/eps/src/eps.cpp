@@ -4,6 +4,16 @@ Board boards[NUM_BOARD];
 bool send_entries_flag = false;
 int next_send_pin=0;
 volatile uint16_t restart_counter =0 ;
+volatile bool has_token = false;
+
+///< ACK system
+bool send_ack = false;
+uint8_t i2c_destination = 0;
+uint8_t i2c_current_buffer_size = 0;
+uint8_t i2c_buffer[BUFFER_LENGTH];
+uint32_t i2c_ack_resend_count = 0;
+uint32_t i2c_timer = 0;
+uint8_t i2c_ack_reply_destination = 1;
 
 void(* reset_board) (void) = 0; 
 
@@ -11,6 +21,60 @@ void setup_slave_master(  ) {
     Wire.begin( BOARD_ID );          // join i2c bus
     Wire.onReceive(i2cReceiveEvent); // register event  
 }
+
+void eps_manage()
+{
+//	eps_check_ack();
+	
+	uint8_t pong_flag = i2c_timer % PING_PONG_DELAY;
+	uint8_t update_flag = i2c_timer % SEND_UPDATE_DELAY;
+	uint8_t get_flag = i2c_timer % GET_DELAY;
+	
+	i2c_timer++;
+	for ( uint8_t i =0 ; i<NUM_BOARD ; ++i )
+	{
+		// If board connected, do.
+		//hardware check to do.
+		if ( boards[i].connected )
+		{
+	/*		if ( pong_flag )
+			{*/
+				boards[i].manage_ping_pong();
+			//}
+			if ( has_token )
+			{
+				eps_send_board_update(i);
+				has_token = false;
+			}
+			/*if ( get_flag )
+			{ 
+				eps_send_action( i+1, EPS_GET );
+			}*/
+			if ( send_entries_flag )
+			{
+				eps_send_entries(i);
+				send_entries_flag = false;
+			}
+		}
+		else
+		{
+			// Process HandShake states
+			if ( i2c_timer % HANDSHAKE_TIME )
+			{
+				boards[i].manage_status( );
+			}
+		}
+	}	
+}
+void eps_check_ack()
+{
+	if ( send_ack == true )
+	{
+		eps_send_action( i2c_ack_reply_destination, EPS_ACK ) ;
+		send_ack = false;
+	}
+}
+
 uint8_t vpin2bpin(int vpin)
 {
     return vpin%PINS_PER_BOARD;
@@ -33,6 +97,28 @@ void printAllPin()
 			Serial.print("  ");
 		}
 	}
+}
+void eps_ack_add_data( uint8_t data)
+{
+    i2c_buffer[i2c_current_buffer_size] = data;	
+    i2c_current_buffer_size++;
+}
+void eps_ack_reset()
+{
+	i2c_current_buffer_size = 0;
+}
+uint8_t eps_ack_is_waiting()
+{
+	return i2c_current_buffer_size;
+}
+void eps_ack_resend()
+{
+	Wire.beginTransmission( i2c_destination );
+	for( uint8_t i = 0; i < i2c_current_buffer_size ; ++i )
+	{ 
+		Wire.I2C_WRITE( i2c_buffer[i] );
+	}
+	Wire.endTransmission();
 }
 // READ
 int eps_read_vpin_value( int pin )
@@ -92,6 +178,9 @@ void eps_write_vpin_type( int pin, uint8_t type) {
 
 void eps_send_action( uint8_t dest, uint8_t action )
 {
+	///< ACK
+	i2c_destination = dest;
+    
     Wire.beginTransmission( dest );
     Wire.I2C_WRITE( BOARD_ID );
     Wire.I2C_WRITE( action );
@@ -100,6 +189,7 @@ void eps_send_action( uint8_t dest, uint8_t action )
 
 void eps_send_version( int dest )
 {
+	i2c_destination = dest;
     Wire.beginTransmission( dest );
     Wire.I2C_WRITE( BOARD_ID );
     Wire.I2C_WRITE( EPS_VERSION );
@@ -116,6 +206,8 @@ void eps_send_board_update(uint8_t dest)
         int value=0;
         count = 2;
         Wire.beginTransmission( dest+1 ); // Open th I2C link (i.e master)
+        ///< ACK
+		i2c_destination = dest+1;	
         while ( !boards[dest].pin_update_queue.isEmpty() && count < BUFFER_LENGTH-2) 
         {
             up = boards[dest].pin_update_queue.pop();
@@ -142,6 +234,8 @@ byte eps_send_entries(uint8_t dest)
 {
     uint8_t j;
     Wire.beginTransmission( dest+1 ); // Open th I2C link
+    ///< ACK
+	i2c_destination = dest+1;
     Wire.I2C_WRITE( BOARD_ID );
     Wire.I2C_WRITE( EPS_SET );
     for( j =0; j< ((BUFFER_LENGTH-2)/3) ; ++j ) // Loop to send all entries. TWI buffer is only 32 Byte. We send 3 byte during each "for" loop
@@ -190,12 +284,13 @@ void i2cReceiveEvent(int howMany)
     }
     else if (action == EPS_RESET )
     {
-        reset_board();
+     //   reset_board();
     }
     else if (action == EPS_INIT )
     {
         boards[sender].check_state = BOARD_OK;
         boards[sender].connected = true;
+        eps_ack_reset(); ///< Reset the ACK flag.
     }
     else if (action == EPS_VERSION )
     {
@@ -211,6 +306,7 @@ void i2cReceiveEvent(int howMany)
                 boards[sender].check_state = BOARD_WAIT_INIT;
             }
         }
+        eps_ack_reset();
     }
     
     #else
@@ -218,9 +314,15 @@ void i2cReceiveEvent(int howMany)
     int value = 0;
     int sender = Wire.I2C_READ() -1;
     byte action = Wire.read();
+    
+    ///< ACK system
+	i2c_ack_reply_destination = sender + 1 ;
+	send_ack = true;
+	
     if ( action == EPS_GET && board.connected ) 
     {
         send_entries_flag = true;
+        Serial.print(" ***GET*** ");
     }
     else if ( action == EPS_SET ) 
     {
@@ -244,6 +346,7 @@ void i2cReceiveEvent(int howMany)
     }
     else if ( action == EPS_ALL ) 
     {
+		Serial.print(" ***ALL/UP*** ");
         while ( Wire.available() )
         {
             action = Wire.I2C_READ();
@@ -269,14 +372,22 @@ void i2cReceiveEvent(int howMany)
     }
     else if ( action == EPS_RESET ) 
     {
-        reset_board();
+		Serial.print(" RESET BOARD ");
+        //reset_board();
     }
     else if ( action == EPS_INIT ) 
     {
+		Serial.print(" INIT ");
         board.check_state = BOARD_WAIT_INIT;
+    }
+    else if ( action == EPS_TOKEN ) 
+    {
+		Serial.print(" TOKEN ");
+        has_token = true;
     }
     else if ( action == EPS_VERSION ) 
     {
+		Serial.print(" VERS ");
 		restart_counter++;
         board.connected = false;
         if ( Wire.available() )
@@ -292,11 +403,18 @@ void i2cReceiveEvent(int howMany)
             }
         }
     }
+    else if ( action == EPS_ACK )
+    {
+		send_ack = false; ///< no need ack for an ACK...
+	//	eps_ack_reset(); ///< Reset the ACK flag.
+		Serial.print(" ACK ");
+    }
     else
     {
         Serial.print(" else? ");
         Serial.print( action );        
     }
+	
     #endif
 }
 

@@ -21,7 +21,7 @@
  
 #define bool boolean
 
-#define DELAY_MAIN_LOOP    		10//µs, used at the end of each Loop(). Base Timer
+#define DELAY_MAIN_LOOP    		1000// 10 //µs, used at the end of each Loop(). Base Timer
 
 #define DELAY_START_UP			1000 	//ms  time to wait at the end of setup(), to be sure the main board is ready !
 #define DELAY_OFF				1000*30 // = 30sec
@@ -53,7 +53,6 @@ uint8_t current_analog = 0; // current analog pin
 uint8_t current_analog_sum_number = 0; // we sum X time each analog value, to smooth result (average result)
 volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
 
-
 /***********************************************************************
  * 
  * Fonctions
@@ -68,10 +67,12 @@ void setup_analog_timer()
 
 void setup() 
 {
-    Serial.begin( SERIAL_BAUDRATE );   
+    Serial.begin( SERIAL_BAUDRATE );  
+    Serial.print(" START ID : ");
+    Serial.print(BOARD_ID);
     setup_slave_master( ); 
-    pinMode(3,OUTPUT);
-  //  setup_analog_timer();
+  //  pinMode(3,OUTPUT);
+    setup_analog_timer();
     
     // Read and init ADCC for 1st time (dummy value)
     delay( DELAY_START_UP );
@@ -79,7 +80,9 @@ void setup()
 
 
 void loop() {
-    board.process_state( MASTER_ID );
+	
+	eps_manage();
+	
     if ( board.check_state == BOARD_OFF )
     {
         Serial.print(" OFF ");
@@ -88,19 +91,40 @@ void loop() {
     else if ( board.check_state == BOARD_W8_MASTER )
     {
 		Serial.print(" W8 ");
-		digitalWrite(3, HIGH);
         delay( DELAY_INIT );
     }
     else
     {
-        // Master want us to send entries values.
-        if ( send_entries_flag )
-        {
-            send_entries_flag = eps_send_entries(0);
-        }
-        ++timer_check_pin_fast;
-        
-        //Check FAST pin ?
+		/**************************************************************
+		 * 
+		 *  I2C & PROCESS
+		 * 
+		 * ************************************************************/
+		/*if ( eps_ack_is_waiting() )
+		{
+			delayMicroseconds( DELAY_ACK_WAIT );
+			if ( eps_ack_is_waiting() )
+			{
+				eps_ack_resend();
+				Serial.print( " >LOST : ");
+			//	Serial.print( i2c_ack_resend_count );
+			}
+		}else {*/
+		//	eps_ack_reset()
+		
+		///< Master want us to send entries values.
+/*		if ( send_entries_flag )
+		{
+			send_entries_flag = eps_send_entries(0);
+		}		*/
+		
+		/**************************************************************
+		 * 
+		 *  CHECK PIN STATE & PUSH
+		 * 
+		 * ************************************************************/
+		//Check FAST pin ?
+	/*	++timer_check_pin_fast;
         if ( timer_check_pin_slow >= DELAY_CHECK_PIN_FAST )
         {
             board.check_pins_update( PIN_TYPE_FAST_CHECK);
@@ -119,13 +143,10 @@ void loop() {
 			board.process_analog();
 			timer_process_analog  = 0;
 		}
-        
-        //Send queued pin value to master via i2c
-        eps_send_board_update( 0 );
-        //__asm__("nop\n\t"); 
-        // wait a bit
-        delayMicroseconds( DELAY_MAIN_LOOP );
+		*/
+		//delayMicroseconds( DELAY_MAIN_LOOP ); //__asm__("nop\n\t"); 
     }
+    
 }
 
 
