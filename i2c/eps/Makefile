@@ -2,10 +2,10 @@
 TARGET = /dev/ttyACM1
 BOARD_TYPE = mega2560
 COMPILER = ino
-BOARD_ID=-1
+SLAVE_ID=-1
 
 build:
-	${COMPILER} build -m ${BOARD_TYPE} -f=-DBOARD_ID=${BOARD_ID}
+	${COMPILER} build -m ${BOARD_TYPE} -f=-DSLAVE_ID=${SLAVE_ID}
 
 clean:
 	${COMPILER} clean
