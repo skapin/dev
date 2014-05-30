@@ -1,3 +1,21 @@
+/*
+    This file is part of Polybox.
+
+    Repetier-Firmware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Repetier-Firmware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #ifndef __PIN_H__
 #define __PIN_H__
 
@@ -24,6 +42,13 @@
 #include "WProgram.h"
 #endif
  
+
+/***********************************************************************
+ * 
+ * Defines
+ * 
+ * ********************************************************************/
+ 
 #define PIN_TYPE_INPUT      INPUT //1
 #define PIN_TYPE_OUTPUT     OUTPUT //0
 #define PIN_TYPE_DIGITAL    0
@@ -38,6 +63,13 @@
 
 #define PIN_NOONE           NULL
 
+
+/***********************************************************************
+ * 
+ * Macros
+ * 
+ * ********************************************************************/
+
 #define PIN_TYPE_IO_MASK   ( PIN_TYPE_INPUT | PIN_TYPE_OUTPUT )
 #define IS_DIGITAL(n) ( (n & PIN_TYPE_IO_MASK) | ( n & PIN_TYPE_DISABLE)  ) == PIN_TYPE_DIGITAL
 #define IS_ANALOG(n) ( (n & PIN_TYPE_IO_MASK) | ( n & PIN_TYPE_DISABLE)  ) ==  PIN_TYPE_ANALOG
@@ -45,6 +77,12 @@
 #define IS_COUNTER(n) ( (n & PIN_TYPE_COUNTER) | ( n & PIN_TYPE_DISABLE)  ) ==  PIN_TYPE_COUNTER
 #define GET_IO_TYPE type & PIN_TYPE_IO_MASK
 
+
+/***********************************************************************
+ * 
+ * Class definition
+ * 
+ * ********************************************************************/
 class Pin
 {
 	public :

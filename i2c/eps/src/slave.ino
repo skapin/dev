@@ -1,3 +1,21 @@
+/*
+    This file is part of Polybox.
+
+    Repetier-Firmware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Repetier-Firmware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 /***********************************************************
  * @file slave.ino
  * @author Florian Boudinet <florian.boudinet@gmail.com>
@@ -64,7 +82,11 @@ void setup_analog_timer()
     OCR0B = 64;
     TIMSK0 |= (1<<OCIE0B);
 }
-
+/**
+ * Setup the Slave. Defined and initialize variables, 
+ * create Serial Connexion and join the I2C BUS using BOARD_ID identifier.
+ * Start Analogique timer.
+ * **/
 void setup() 
 {
     Serial.begin( SERIAL_BAUDRATE );  
@@ -78,9 +100,14 @@ void setup()
     delay( DELAY_START_UP );
 }
 
-
+/**
+ * Main Function for the µP, called forever (while true).
+ * **/
 void loop() {
 	
+	/**
+	 * Manage Board and I2C.
+	 * **/
 	eps_manage();
 	
     if ( board.check_state == BOARD_OFF )
@@ -124,7 +151,7 @@ void loop() {
 		 * 
 		 * ************************************************************/
 		//Check FAST pin ?
-	/*	++timer_check_pin_fast;
+		++timer_check_pin_fast;
         if ( timer_check_pin_slow >= DELAY_CHECK_PIN_FAST )
         {
             board.check_pins_update( PIN_TYPE_FAST_CHECK);
@@ -143,7 +170,7 @@ void loop() {
 			board.process_analog();
 			timer_process_analog  = 0;
 		}
-		*/
+		
 		//delayMicroseconds( DELAY_MAIN_LOOP ); //__asm__("nop\n\t"); 
     }
     
