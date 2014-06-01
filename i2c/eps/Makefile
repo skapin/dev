@@ -1,5 +1,5 @@
 
-TARGET = /dev/ttyACM1
+TARGET = ${DEVICE}
 BOARD_TYPE = mega2560
 COMPILER = ino
 SLAVE_ID=-1

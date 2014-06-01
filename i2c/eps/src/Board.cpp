@@ -140,7 +140,7 @@ void Board::check_pins_update(uint8_t type)
         // we process only INPUT type pin. Output are controled by master.
         if ( pin_values[i]->GET_IO_TYPE == PIN_TYPE_INPUT )
         {
-			// Standard pin 
+			// Standard pin (type=0)
 			if ( IS_STANDARD(pin_values[i]->type)  &&  ( ( pin_values[i]->type & PIN_TYPE_FAST_CHECK ) == type) )
 			{
 				if ( IS_DIGITAL( pin_values[i]->type ) )
@@ -148,8 +148,10 @@ void Board::check_pins_update(uint8_t type)
 					value = digitalRead( i );
 					if ( read_bpin( i ) != value )
 					{
-						pin_update_queue.push( Update{ i, EPS_SET } );
+						/* Write the value inside the table */
 						write_bpin( i, value );
+						/* We push the Update pin into the pin table for sending through I2C */
+						pin_update_queue.push( Update{ i, EPS_SET } );
 					}
 				}
 			}
@@ -158,6 +160,8 @@ void Board::check_pins_update(uint8_t type)
 			{
 				// update counter value if FAST check
 				CounterPin *c = static_cast<CounterPin*>(pin_values[i]);
+				/* If the current state checked is FAST_PIN, we increase the current pin value.
+				 * Else (so STANDARD_PIN (type=0), we send update of fast pin if needed. */
 				if (  (type == PIN_TYPE_FAST_CHECK) )
 				{
 					value = digitalRead( i );
@@ -168,7 +172,7 @@ void Board::check_pins_update(uint8_t type)
 						write_bpin( i, read_bpin( i )+1 );
 					}
 				}
-				// push updatequeue, so counter can be sent to master asap
+				// push updatequeue, so counter can be sent to master when NORMAL_CHECK
 				else if ( c->updated )
 				{
 					c->updated = false;
@@ -196,10 +200,12 @@ uint8_t Board::read_bpin_type( uint8_t pin )
     return pin_values[pin]->type;
 }
 // WRITE
+/** Write Board pin. Write into the current pin table given value.**/
 int Board::write_bpin(  uint8_t pin, int value )
 {
     pin_values[pin]->value = value;
 }
+
 uint8_t Board::write_bpin_type( uint8_t pin, uint8_t type )
 {
     pin_values[pin]->type = type;
