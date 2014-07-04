@@ -152,6 +152,7 @@ void Board::check_pins_update(uint8_t type)
 						write_bpin( i, value );
 						/* We push the Update pin into the pin table for sending through I2C */
 						pin_update_queue.push( Update{ i, EPS_SET } );
+						Serial.print(" HW pin detected ");
 					}
 				}
 			}
