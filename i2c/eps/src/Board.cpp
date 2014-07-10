@@ -138,7 +138,7 @@ void Board::check_pins_update(uint8_t type)
     for ( uint8_t i = 0; i < PINS_PER_BOARD ; ++i )
     {
         // we process only INPUT type pin. Output are controled by master.
-        if ( pin_values[i]->GET_IO_TYPE == PIN_TYPE_INPUT )
+        if ( (pin_values[i]->GET_IO_TYPE) == PIN_TYPE_INPUT )
         {
 			// Standard pin (type=0)
 			if ( IS_STANDARD(pin_values[i]->type)  &&  ( ( pin_values[i]->type & PIN_TYPE_FAST_CHECK ) == type) )
@@ -146,13 +146,13 @@ void Board::check_pins_update(uint8_t type)
 				if ( IS_DIGITAL( pin_values[i]->type ) )
 				{
 					value = digitalRead( i );
+					Serial.print(digitalRead( i ));
 					if ( read_bpin( i ) != value )
 					{
 						/* Write the value inside the table */
 						write_bpin( i, value );
 						/* We push the Update pin into the pin table for sending through I2C */
 						pin_update_queue.push( Update{ i, EPS_SET } );
-						Serial.print(" HW pin detected ");
 					}
 				}
 			}
@@ -180,6 +180,9 @@ void Board::check_pins_update(uint8_t type)
 					pin_update_queue.push( Update{ i, EPS_SET } );
 				}
 			}
+		}
+		else
+		{
 		}
     }
 }

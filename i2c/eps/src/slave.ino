@@ -64,8 +64,8 @@
  * 
  * ********************************************************************/
 uint8_t need_check = true ;
-uint8_t timer_check_pin_slow = 0;
-uint8_t timer_check_pin_fast = 0;
+uint32_t timer_check_pin_slow = 0;
+uint32_t timer_check_pin_fast = 0;
 uint8_t timer_process_analog = 0;
 uint8_t current_analog = 0; // current analog pin
 uint8_t current_analog_sum_number = 0; // we sum X time each analog value, to smooth result (average result)
@@ -82,6 +82,16 @@ void setup_analog_timer()
     OCR0B = 64;
     TIMSK0 |= (1<<OCIE0B);
 }
+
+void setAllPinInput()
+{
+	Serial.print(" > INIT INPUT TYPE < ");
+	for (uint8_t i = 0; i < PINS_PER_BOARD ; ++i )
+	{
+			board.pin_values[i]->type = PIN_TYPE_INPUT;
+	}
+}
+
 /**
  * Setup the Slave. Defined and initialize variables, 
  * create Serial Connexion and join the I2C BUS using BOARD_ID identifier.
@@ -98,6 +108,7 @@ void setup()
     
     // Read and init ADCC for 1st time (dummy value)
     delay( DELAY_START_UP );
+    setAllPinInput();
 }
 
 /**
@@ -110,12 +121,12 @@ void loop() {
 	 * **/
 	eps_manage();
 	
-    if ( board.check_state == BOARD_OFF )
+    if ( false )
     {
         Serial.print(" OFF ");
         delay( DELAY_OFF );
     }
-    else if ( board.check_state == BOARD_W8_MASTER )
+    else if ( false )
     {
 		Serial.print(" W8 ");
         delay( DELAY_INIT );
@@ -154,7 +165,7 @@ void loop() {
 		++timer_check_pin_fast;
         if ( timer_check_pin_slow >= DELAY_CHECK_PIN_FAST )
         {
-            board.check_pins_update( PIN_TYPE_FAST_CHECK);
+        //    board.check_pins_update( PIN_TYPE_FAST_CHECK);
             timer_check_pin_fast = 0;
         }
         //Check SLOW (classic) pin ?

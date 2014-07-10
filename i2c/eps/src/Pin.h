@@ -49,8 +49,8 @@
  * 
  * ********************************************************************/
  
-#define PIN_TYPE_INPUT      INPUT //1
-#define PIN_TYPE_OUTPUT     OUTPUT //0
+#define PIN_TYPE_INPUT      INPUT //0
+#define PIN_TYPE_OUTPUT     OUTPUT //1
 #define PIN_TYPE_DIGITAL    0
 #define PIN_TYPE_ANALOG     2
 #define PIN_TYPE_DISABLE    4
