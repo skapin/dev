@@ -20,7 +20,9 @@ do
     make clean
     echo "Plug your board via USB now. \nPress a key when ready."
     read
-    usb=`ls -t /dev/ |grep tty | head -n 1`
-    make DEVICE=$usb SLAVE_ID=$i
+    usb=`ls -t /dev/ |grep ttyAC | head -n 1`
+    usb=/dev/$usb
+    make SLAVE_ID=$i
+    make up DEVICE=$usb
     currentid=$currentid+1
 done
