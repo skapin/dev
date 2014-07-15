@@ -76,10 +76,6 @@ class Board
     Board();
     ~Board();
     /**
-     * Manage board's status. Initialization, waiting version, waiting init, ready 
-     * */
-    void manage_status( );
-    /**
      * Watch pins's state, and adds new values ​​to the table pin_value.
      * */
     void check_pins_update(uint8_t type = 0);
@@ -87,11 +83,6 @@ class Board
      * Process and compute analogic values.
      * **/
     void process_analog();
-    /**
-     * Handle the ping-pong (keep-alive) protocol through I2C.
-     * **/
-    void manage_ping_pong();
-   
    /**
     * Initialize pin_value table.
     * **/

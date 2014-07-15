@@ -108,7 +108,7 @@ void setup()
     
     // Read and init ADCC for 1st time (dummy value)
     delay( DELAY_START_UP );
-    setAllPinInput();
+   // setAllPinInput();
 }
 
 /**
@@ -121,12 +121,12 @@ void loop() {
 	 * **/
 	eps_manage();
 	
-    if ( false )
+    if ( board.check_state == BOARD_OFF )
     {
         Serial.print(" OFF ");
         delay( DELAY_OFF );
     }
-    else if ( false )
+    else if ( board.check_state == BOARD_W8_MASTER )
     {
 		Serial.print(" W8 ");
         delay( DELAY_INIT );
@@ -172,7 +172,7 @@ void loop() {
         ++timer_check_pin_slow;
         if ( timer_check_pin_slow >= DELAY_CHECK_PIN_SLOW )
         {
-            board.check_pins_update( );
+          //  board.check_pins_update( );
             timer_check_pin_slow = 0;
         }
         // push analog update.

@@ -101,7 +101,6 @@ extern bool send_entries_flag;
 extern volatile bool has_token;
 extern uint32_t i2c_ack_resend_count;
 extern uint32_t i2c_timer;
-extern bool send_ack;
 
 /***********************************************************************
  * 
@@ -128,15 +127,13 @@ void eps_write_vpin_type( int pin, uint8_t type);
  * Functions
  * 
  * ********************************************************************/
- 
-void eps_send_action( uint8_t dest, uint8_t action );
-void eps_send_version( int dest );
 
 void eps_send_board_update(uint8_t dest);
-byte eps_send_entries(uint8_t dest);
+byte eps_send_entries();
 
 void eps_manage();
 
+void i2cRequestEvent();
 void i2cReceiveEvent(int howMany);
 void setup_slave_master();
 void printAllPin();
@@ -147,17 +144,5 @@ void printAllPin();
  void * operator new(size_t size); 
 #endif
 
-
-/***********************************************************************
- * 
- * ACK 
- * 
- * ********************************************************************/
- 
-void eps_ack_add_data( uint8_t data);
-void eps_ack_reset();
-uint8_t eps_ack_is_waiting();
-void eps_ack_resend();
-void eps_check_ack();
 
 #endif
