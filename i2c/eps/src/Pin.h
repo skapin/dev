@@ -71,10 +71,14 @@
  * ********************************************************************/
 
 #define PIN_TYPE_IO_MASK   ( PIN_TYPE_INPUT | PIN_TYPE_OUTPUT )
-#define IS_DIGITAL(n) ( (n & PIN_TYPE_IO_MASK) | ( n & PIN_TYPE_DISABLE)  ) == PIN_TYPE_DIGITAL
-#define IS_ANALOG(n) ( (n & PIN_TYPE_IO_MASK) | ( n & PIN_TYPE_DISABLE)  ) ==  PIN_TYPE_ANALOG
+#define PIN_TYPE_AD_MASK   ( PIN_TYPE_DIGITAL | PIN_TYPE_ANALOG )
+
+#define IS_DIGITAL(n) ( (n & PIN_TYPE_AD_MASK) | ( n & PIN_TYPE_DISABLE)  ) == PIN_TYPE_DIGITAL
+#define IS_ANALOG(n) ( (n & PIN_TYPE_AD_MASK) | ( n & PIN_TYPE_DISABLE)  ) ==  PIN_TYPE_ANALOG
+
 #define IS_STANDARD(n) ( ( n & PIN_TYPE_COUNTER ) | ( n & PIN_TYPE_DISABLE)  ) ==  PIN_TYPE_STANDARD
 #define IS_COUNTER(n) ( (n & PIN_TYPE_COUNTER) | ( n & PIN_TYPE_DISABLE)  ) ==  PIN_TYPE_COUNTER
+
 #define GET_IO_TYPE type & PIN_TYPE_IO_MASK
 
 

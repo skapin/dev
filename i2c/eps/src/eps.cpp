@@ -160,6 +160,7 @@ byte eps_send_entries()
     {
         if ( ( boards[0].read_bpin_type(next_send_pin)  & PIN_TYPE_IO_MASK ) == PIN_TYPE_INPUT ) 
         {
+			Wire.I2C_WRITE( EPS_SET );
             Wire.I2C_WRITE( next_send_pin );
             Wire.I2C_WRITE( (byte) ((boards[0].pin_values[next_send_pin]->value & 0xFF00) >> 8)  );
             Wire.I2C_WRITE( (byte) (boards[0].pin_values[next_send_pin]->value & 0x00FF) );
