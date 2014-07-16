@@ -131,7 +131,7 @@ void eps_send_board_update(uint8_t dest)
         Update up;
         byte count=0;
         int value=0;
-        count = 2;
+        count = 0;
         while ( !boards[dest].pin_update_queue.isEmpty() && count < BUFFER_LENGTH-2) 
         {
             up = boards[dest].pin_update_queue.pop();
@@ -202,7 +202,6 @@ void i2cRequestEvent()
     }
     else if ( has_token ) 
     {
-		Wire.I2C_WRITE( EPS_PROTOCOL_VERSION ); 
 		eps_send_board_update(0);
 		has_token = false;
 		Serial.print("*");

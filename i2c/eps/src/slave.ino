@@ -132,30 +132,7 @@ void loop() {
         delay( DELAY_INIT );
     }
     else
-    {
-		/**************************************************************
-		 * 
-		 *  I2C & PROCESS
-		 * 
-		 * ************************************************************/
-		/*if ( eps_ack_is_waiting() )
-		{
-			delayMicroseconds( DELAY_ACK_WAIT );
-			if ( eps_ack_is_waiting() )
-			{
-				eps_ack_resend();
-				Serial.print( " >LOST : ");
-			//	Serial.print( i2c_ack_resend_count );
-			}
-		}else {*/
-		//	eps_ack_reset()
-		
-		///< Master want us to send entries values.
-/*		if ( send_entries_flag )
-		{
-			send_entries_flag = eps_send_entries(0);
-		}		*/
-		
+    {		
 		/**************************************************************
 		 * 
 		 *  CHECK PIN STATE & PUSH
@@ -170,21 +147,19 @@ void loop() {
         }
         //Check SLOW (classic) pin ?
         ++timer_check_pin_slow;
-        if ( timer_check_pin_slow >= DELAY_CHECK_PIN_SLOW )
-        {
-          //  board.check_pins_update( );
-            timer_check_pin_slow = 0;
-        }
-        // push analog update.
-        if ( timer_process_analog >= DELAY_PROCESS_ANALOG )
-        {
+		if ( timer_check_pin_slow >= DELAY_CHECK_PIN_SLOW )
+		{
+			board.check_pins_update( );
+			timer_check_pin_slow = 0;
+		}
+		// push analog update.
+		if ( timer_process_analog >= DELAY_PROCESS_ANALOG )
+		{
 			board.process_analog();
 			timer_process_analog  = 0;
 		}
-		
 		//delayMicroseconds( DELAY_MAIN_LOOP ); //__asm__("nop\n\t"); 
-    }
-    
+	}
 }
 
 
