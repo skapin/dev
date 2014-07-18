@@ -104,7 +104,7 @@ void setup()
     Serial.print(BOARD_ID);
     setup_slave_master( ); 
   //  pinMode(3,OUTPUT);
-    setup_analog_timer();
+   // setup_analog_timer();
     
     // Read and init ADCC for 1st time (dummy value)
     delay( DELAY_START_UP );

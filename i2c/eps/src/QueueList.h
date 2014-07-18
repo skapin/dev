@@ -209,7 +209,7 @@ void QueueList<T>::exit (const char * m) const {
     printer->println (m);
 
   // loop blinking until hardware reset.
-  blink ();
+  //blink ();
 }
 
 // led blinking method in case of error.

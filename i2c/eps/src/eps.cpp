@@ -99,14 +99,14 @@ void eps_set_vpin_value( int pin, int value) {
     }
     else
     {
-        if ( IS_DIGITAL(boards[board_n].pin_values[real_pin]->type) ) // digital
+        /*if ( IS_DIGITAL(boards[board_n].pin_values[real_pin]->type) ) // digital
         {
             digitalWrite( real_pin, value );
         }
         else
-        {
-            analogWrite( real_pin, value );
-        }
+        {*/
+        analogWrite( real_pin, value );
+        //}
     }//pin_update_queue.push( Update{pin, eps_SET} );
 }
 
@@ -191,7 +191,7 @@ void i2cRequestEvent()
 	}
     else if ( action == EPS_RESET ) 
     {
-		Serial.print(" RESET BOARD ");
+		Serial.print(" RESET BOARD Q ");
         //reset_board();
     }
     else if ( action == BOARD_WAIT_INIT ) 
@@ -239,11 +239,11 @@ void i2cReceiveEvent(int howMany)
     {
         send_entries_flag = true;
     }
-	else if ( action == EPS_TOKEN )
+	else if ( action == EPS_TOKEN && board.connected)
 	{
 		has_token = true;
 	}
-    else if ( action == EPS_SET ) 
+    else if ( action == EPS_SET  && board.connected) 
     {
         if ( Wire.available() )
         {
@@ -253,7 +253,7 @@ void i2cReceiveEvent(int howMany)
             WRITE_VPIN( pin, value );            
         }
     }
-    else if ( action == EPS_SETUP ) 
+    else if ( action == EPS_SETUP && board.connected ) 
     {
         while ( Wire.available() )
         {
@@ -263,7 +263,7 @@ void i2cReceiveEvent(int howMany)
             Serial.print(pin);
         }
     }
-    else if ( action == EPS_ALL ) 
+    else if ( action == EPS_ALL && board.connected) 
     {
 		Serial.print(" ***ALL/UP*** ");
         while ( Wire.available() )
