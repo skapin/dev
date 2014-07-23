@@ -61,10 +61,20 @@ void Board::check_pins_update(uint8_t type)
 			// Standard pin (type=0)
 			if ( IS_STANDARD(pin_values[i]->type)  &&  ( ( pin_values[i]->type & PIN_TYPE_FAST_CHECK ) == type) )
 			{
+				int board_value = read_bpin( i );
 				if ( IS_DIGITAL( pin_values[i]->type ) )
 				{
 					value = digitalRead( i );
-					if ( read_bpin( i ) != value )
+				}
+				else if ( IS_ANALOG( pin_values[i]->type ) )
+				{
+					value = analogRead( i );
+					if ( value < ( board_value+ANALOG_TOLERANCE_RANGE ) && value > ( board_value + ANALOG_TOLERANCE_RANGE ) )
+					{
+						value = board_value;
+					}
+				}
+				if ( board_value != value )
 					{
 						/* Write the value inside the table */
 						write_bpin( i, value );
@@ -75,7 +85,6 @@ void Board::check_pins_update(uint8_t type)
 						Serial.print(value );
 						Serial.print("]");
 					}
-				}
 			}
 			// check Counter type
 			else if ( IS_COUNTER(pin_values[i]->type)  )

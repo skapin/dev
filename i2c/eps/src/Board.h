@@ -62,7 +62,7 @@
 #define BOARD_UPDATE_CHECK_DELAY        1 //total time is : 100ms * BOARD_UPDATE_CHECK_DELAY = 100mssec
 #define BOARD_SEND_GET_DELAY            10*60 // 1min
 
-
+#define ANALOG_TOLERANCE_RANGE			2 // 0.0049V per unit so it's a window of +/- 0.0098V 
 
 /***********************************************************************
  * 
