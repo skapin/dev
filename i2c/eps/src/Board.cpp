@@ -39,13 +39,20 @@ Board::~Board()
 void Board::process_analog()
 {
     int value=0;
+    int board_value = 0;
     // we process only analog compatible output pin (i.e pwm out). Check Configuration_eps.h for value/range
     for ( uint8_t i = PIN_ANALOG; i < PINS_PER_BOARD ; ++i )
     {
         // we process only INPUT type pin. Output are controled by master.
-        if ( pin_values[i]->GET_IO_TYPE == PIN_TYPE_INPUT && IS_ANALOG( pin_values[i]->type ) )
+        if ( (pin_values[i]->GET_IO_TYPE) == PIN_TYPE_INPUT && IS_ANALOG( pin_values[i]->type ) )
         {
-			pin_update_queue.push( Update{ i, EPS_SET } );
+			value = analogRead( i-PIN_ANALOG );
+			board_value = pin_values[i]->value ;
+			if ( value > ( board_value + ANALOG_TOLERANCE_RANGE ) || value < ( board_value - ANALOG_TOLERANCE_RANGE ) )
+			{
+				write_bpin( i, value );
+				pin_update_queue.push( Update{ i, EPS_SET } );				
+			}
 		}
 	}
 }
@@ -65,26 +72,14 @@ void Board::check_pins_update(uint8_t type)
 				if ( IS_DIGITAL( pin_values[i]->type ) )
 				{
 					value = digitalRead( i );
-				}
-				else if ( IS_ANALOG( pin_values[i]->type ) )
-				{
-					value = analogRead( i );
-					if ( value < ( board_value+ANALOG_TOLERANCE_RANGE ) && value > ( board_value + ANALOG_TOLERANCE_RANGE ) )
-					{
-						value = board_value;
-					}
-				}
-				if ( board_value != value )
+					if ( board_value != value )
 					{
 						/* Write the value inside the table */
 						write_bpin( i, value );
 						/* We push the Update pin into the pin table for sending through I2C */
 						pin_update_queue.push( Update{ i, EPS_SET } );
-						
-						Serial.print("[");
-						Serial.print(value );
-						Serial.print("]");
 					}
+				}
 			}
 			// check Counter type
 			else if ( IS_COUNTER(pin_values[i]->type)  )

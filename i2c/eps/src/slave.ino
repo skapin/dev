@@ -66,7 +66,7 @@
 uint8_t need_check = true ;
 uint32_t timer_check_pin_slow = 0;
 uint32_t timer_check_pin_fast = 0;
-uint8_t timer_process_analog = 0;
+uint32_t timer_process_analog = 0;
 uint8_t current_analog = 0; // current analog pin
 uint8_t current_analog_sum_number = 0; // we sum X time each analog value, to smooth result (average result)
 volatile byte timer_eps_update = 0 ;// 10ms*10 = 100ms; use base counter
@@ -153,6 +153,7 @@ void loop() {
 			timer_check_pin_slow = 0;
 		}
 		// push analog update.
+		++timer_process_analog;
 		if ( timer_process_analog >= DELAY_PROCESS_ANALOG )
 		{
 			board.process_analog();
